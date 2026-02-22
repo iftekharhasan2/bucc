@@ -243,12 +243,16 @@
 
     /* ── Status bar ──────────────────────────────────────────────── */
     .status-bar {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:4px 14px;
-      background:var(--surface);
-      border:1px solid var(--border); border-top:none;
-      border-radius:0 0 8px 8px;
-      flex-shrink:0;
+        display: flex
+    ;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        flex-shrink: 0;
     }
     .status-bar span { font-size:clamp(0.32rem,0.9vw,0.44rem); color:var(--comment); }
     .status-bar .mode { color:var(--green); margin-right:8px; font-weight:700; }
