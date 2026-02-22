@@ -7,373 +7,362 @@
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:       #0d1117;
-      --surface:  #161b22;
-      --border:   #30363d;
-      --green:    #39ff14;
-      --green-dim:#1a7a00;
-      --amber:    #ffb800;
-      --red:      #ff4444;
-      --blue:     #58a6ff;
-      --purple:   #bc8cff;
-      --comment:  #8b949e;
-      --text:     #e6edf3;
-      --glow-g:   0 0 10px #39ff1466, 0 0 30px #39ff1422;
-      --glow-a:   0 0 10px #ffb80066;
-      --glow-r:   0 0 10px #ff444466;
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --green:     #39ff14;
+      --green-dim: #1a7a00;
+      --green-mid: #00cc00;
+      --amber:     #ffb800;
+      --red:       #ff4444;
+      --blue:      #58a6ff;
+      --purple:    #bc8cff;
+      --comment:   #8b949e;
+      --text:      #e6edf3;
+      --glow-g:    0 0 12px #39ff1488, 0 0 30px #39ff1433;
+      --glow-a:    0 0 12px #ffb80088;
+      --glow-r:    0 0 12px #ff444488;
     }
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html, body { width:100%; height:100%; overflow:hidden; }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Fira Code', monospace;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
       position: relative;
     }
 
-    /* Matrix rain background */
+    /* Matrix rain */
     #matrix-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      opacity: 0.07;
-      pointer-events: none;
+      position:fixed; inset:0; z-index:0;
+      opacity:0.06; pointer-events:none;
     }
 
     /* CRT scanlines */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 3px,
-        rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px
+      content:'';
+      position:fixed; inset:0;
+      background:repeating-linear-gradient(
+        0deg,transparent,transparent 3px,
+        rgba(0,0,0,0.12) 3px,rgba(0,0,0,0.12) 4px
       );
-      pointer-events: none;
-      z-index: 200;
+      pointer-events:none; z-index:500;
     }
 
-    .page {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      padding: 16px;
+    /* ── Shell ────────────────────────────────────────────────────── */
+    .shell {
+      position:relative; z-index:10;
+      display:flex; flex-direction:column;
+      width:100vw; height:100vh;
+      max-width:1100px;
+      padding:8px 10px;
     }
 
-    /* ── Title bar (like a terminal window) ── */
-    .terminal-bar {
-      width: 100%;
-      max-width: 500px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px 10px 0 0;
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .dot { width:12px;height:12px;border-radius:50%; }
-    .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
-
-    .terminal-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      color: var(--comment);
-      margin-left: 6px;
-      letter-spacing: 1px;
-    }
-
-    .terminal-title span { color: var(--green); }
-
-    /* ── Main title ── */
-    .game-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 800;
-      font-size: clamp(1.4rem, 5vw, 2.6rem);
-      color: var(--green);
-      text-shadow: var(--glow-g);
-      letter-spacing: 4px;
-      position: relative;
-    }
-
-    .game-title::after {
-      content: '_';
-      animation: blink-cursor 1s step-end infinite;
-    }
-
-    @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
-
-    .game-subtitle {
-      font-size: 0.55rem;
-      color: var(--comment);
-      letter-spacing: 2px;
-    }
-
-    .game-subtitle span { color: var(--amber); }
-
-    /* ── HUD ── */
-    .hud {
-      width: 100%;
-      max-width: 500px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-top: none;
-      padding: 8px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.5rem;
-    }
-
-    .hud-item { display:flex;flex-direction:column;gap:3px;align-items:center; }
-    .hud-key  { color:var(--comment);letter-spacing:2px; }
-    .hud-val  { color:var(--green);font-size:0.9rem;font-weight:700;text-shadow:var(--glow-g); }
-    .hud-val.amber { color:var(--amber);text-shadow:var(--glow-a); }
-
-    .level-pips { display:flex;gap:4px; }
-    .pip { width:10px;height:10px;border-radius:2px;background:var(--border);border:1px solid var(--green-dim);transition:all .2s; }
-    .pip.on { background:var(--green);box-shadow:0 0 6px var(--green); }
-
-    /* ── Game wrapper ── */
-    .game-wrapper {
-      position: relative;
-      border: 1px solid var(--border);
-      border-top: none;
-      box-shadow: 0 0 0 1px #39ff1422, 0 20px 60px #00000088;
-    }
-
-    canvas { display:block;background:var(--bg);outline:none; }
-
-    /* ── Overlays ── */
-    .overlay {
-      position:absolute;inset:0;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      background: rgba(13,17,23,0.95);
-      gap:14px;
-      transition:opacity 0.3s;
-      padding: 20px;
-    }
-    .overlay.hidden { opacity:0;pointer-events:none; }
-
-    /* Code block style title */
-    .ov-code {
-      font-family:'JetBrains Mono',monospace;
-      font-size:0.55rem;
-      color:var(--comment);
-      text-align:center;
-      line-height:1.8;
+    /* ── Title bar ───────────────────────────────────────────────── */
+    .title-bar {
+      display:flex; align-items:center; gap:10px;
+      padding:6px 14px;
       background:var(--surface);
       border:1px solid var(--border);
-      border-radius:6px;
-      padding:12px 20px;
-      max-width:340px;
+      border-radius:8px 8px 0 0;
+      flex-shrink:0;
     }
 
-    .ov-code .kw   { color:var(--purple); }
-    .ov-code .fn   { color:var(--blue); }
-    .ov-code .str  { color:var(--amber); }
-    .ov-code .num  { color:var(--green); }
-    .ov-code .cmt  { color:var(--comment); }
-    .ov-code .err  { color:var(--red); }
+    .dot { width:11px;height:11px;border-radius:50%;flex-shrink:0; }
+    .dot.r{background:#ff5f57;box-shadow:0 0 4px #ff5f5788;}
+    .dot.y{background:#febc2e;box-shadow:0 0 4px #febc2e88;}
+    .dot.g{background:#28c840;box-shadow:0 0 4px #28c84088;}
+
+    .title-text {
+      font-family:'JetBrains Mono',monospace;
+      font-size:clamp(0.5rem,1.4vw,0.72rem);
+      color:var(--comment);
+    }
+    .title-text span { color:var(--green); }
+
+    .title-game {
+      margin-left:auto;
+      font-family:'JetBrains Mono',monospace;
+      font-weight:800;
+      font-size:clamp(0.75rem,2vw,1.05rem);
+      color:var(--green);
+      text-shadow:var(--glow-g);
+      letter-spacing:4px;
+    }
+    .title-game::after { content:'_'; animation:blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── HUD ─────────────────────────────────────────────────────── */
+    .hud {
+      display:flex; align-items:center;
+      justify-content:space-between;
+      padding:5px 18px;
+      background:var(--surface);
+      border:1px solid var(--border); border-top:none;
+      flex-shrink:0;
+    }
+
+    .hud-item  { display:flex; align-items:center; gap:10px; }
+    .hud-label { font-size:clamp(0.36rem,1vw,0.48rem); color:var(--comment); letter-spacing:2px; }
+    .hud-val   {
+      font-family:'JetBrains Mono',monospace; font-weight:800;
+      font-size:clamp(0.85rem,2.5vw,1.15rem);
+      color:var(--green); text-shadow:var(--glow-g); min-width:38px;
+    }
+    .hud-val.amber { color:var(--amber); text-shadow:var(--glow-a); }
+
+    .pip-row { display:flex; gap:5px; }
+    .pip {
+      width:13px; height:13px; border-radius:3px;
+      background:var(--border); border:1px solid var(--green-dim);
+      transition:all .2s;
+    }
+    .pip.on { background:var(--green); box-shadow:0 0 8px var(--green); }
+
+    /* ── Game area — takes ALL remaining height ───────────────────── */
+    .game-area {
+      position:relative;
+      flex:1 1 auto;
+      overflow:hidden;
+      border:1px solid var(--border); border-top:none;
+      box-shadow:
+        inset 0 0 80px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(57,255,20,0.08),
+        0 0 50px rgba(57,255,20,0.04);
+    }
+
+    #gameCanvas {
+      display:block;
+      /* fill container via CSS but drawn at exact pixel size */
+      width:100%; height:100%;
+      background:#080c10;
+      outline:none;
+    }
+
+    /* ── Overlays ────────────────────────────────────────────────── */
+    .overlay {
+      position:absolute; inset:0;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:rgba(8,12,16,0.94);
+      gap:clamp(10px,2.2vh,22px);
+      transition:opacity .3s;
+      padding:20px;
+      z-index:50;
+    }
+    .overlay.hidden { opacity:0; pointer-events:none; }
 
     .ov-title {
       font-family:'JetBrains Mono',monospace;
       font-weight:800;
-      font-size:clamp(1rem,3vw,1.8rem);
-      letter-spacing:3px;
-      animation:glitch 3s infinite;
+      font-size:clamp(1.5rem,5.5vw,3.2rem);
+      letter-spacing:4px;
     }
+    .ov-title.green { color:var(--green); text-shadow:var(--glow-g); animation:glitch 4s infinite; }
+    .ov-title.red   { color:var(--red);   text-shadow:var(--glow-r); }
 
     @keyframes glitch {
-      0%,95%,100%{text-shadow:var(--glow-g)}
-      96%{text-shadow:-2px 0 var(--red),2px 0 var(--blue)}
-      97%{text-shadow:2px 0 var(--red),-2px 0 var(--blue)}
-      98%{text-shadow:var(--glow-g)}
+      0%,93%,100%{text-shadow:var(--glow-g)}
+      94%{text-shadow:-3px 0 var(--red),3px 0 var(--blue)}
+      95%{text-shadow:3px 0 var(--red),-3px 0 var(--blue)}
+      96%{text-shadow:var(--glow-g)}
     }
+
+    .ov-code {
+      font-family:'JetBrains Mono',monospace;
+      font-size:clamp(0.52rem,1.5vw,0.75rem);
+      color:var(--comment); line-height:2;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-left:3px solid var(--green);
+      border-radius:6px;
+      padding:clamp(10px,2vh,18px) clamp(14px,3vw,28px);
+      max-width:min(440px,88vw);
+      text-align:left;
+    }
+    .kw  { color:var(--purple); }
+    .fn  { color:var(--blue); }
+    .str { color:var(--amber); }
+    .num { color:var(--green); }
+    .cmt { color:var(--comment); opacity:0.65; }
+    .err { color:var(--red); }
+
+    .ov-sub {
+      font-size:clamp(0.42rem,1.3vw,0.6rem);
+      color:var(--comment); text-align:center; line-height:2;
+      max-width:min(380px,85vw);
+    }
+    .ov-sub .hl   { color:var(--green); }
+    .ov-sub .hl-r { color:var(--red); }
+
+    .crash-box {
+      background:rgba(255,68,68,0.09);
+      border:1px solid rgba(255,68,68,0.3);
+      border-radius:6px;
+      padding:clamp(8px,1.5vh,14px) clamp(14px,3vw,26px);
+      font-family:'JetBrains Mono',monospace;
+      font-size:clamp(0.5rem,1.5vw,0.68rem);
+      color:var(--red); text-shadow:var(--glow-r);
+      text-align:center; animation:fadeUp .4s ease;
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
     .ov-score {
-      font-size:1.2rem;
-      font-weight:700;
-      color:var(--amber);
-      text-shadow:var(--glow-a);
+      font-family:'JetBrains Mono',monospace; font-weight:800;
+      font-size:clamp(1rem,3.5vw,1.6rem);
+      color:var(--amber); text-shadow:var(--glow-a);
     }
 
-    .ov-msg {
-      font-size:0.45rem;
-      color:var(--comment);
-      text-align:center;
-      line-height:2;
-      max-width:300px;
+    .ov-gomsg {
+      font-size:clamp(0.42rem,1.3vw,0.58rem);
+      color:var(--comment); text-align:center; line-height:2.2;
     }
+    .ov-gomsg .hl  { color:var(--green); }
+    .ov-gomsg .hl-a { color:var(--amber); }
 
-    .ov-msg .hl { color:var(--green); }
-    .ov-msg .hl-r { color:var(--red); }
-
-    .crash-reason {
-      font-size:0.48rem;
-      color:var(--red);
-      text-shadow:var(--glow-r);
-      text-align:center;
-      font-family:'JetBrains Mono',monospace;
-      animation:fadeIn .4s ease;
-      background: rgba(255,68,68,0.08);
-      border:1px solid rgba(255,68,68,0.2);
-      border-radius:4px;
-      padding: 8px 16px;
-    }
-
-    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-    /* Buttons */
-    .btn-row { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px; }
+    .btn-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
 
     .btn {
       font-family:'Fira Code',monospace;
-      font-size:0.5rem;
-      padding:9px 20px;
+      font-size:clamp(0.48rem,1.4vw,0.62rem);
+      padding:clamp(8px,1.5vh,13px) clamp(18px,3vw,30px);
       background:transparent;
-      border:1px solid var(--green);
-      color:var(--green);
-      cursor:pointer;
-      letter-spacing:2px;
-      text-shadow:var(--glow-g);
-      box-shadow:0 0 10px #39ff1422;
-      border-radius:4px;
-      transition:all 0.15s;
+      border:1px solid var(--green); color:var(--green);
+      cursor:pointer; letter-spacing:2px;
+      text-shadow:var(--glow-g); box-shadow:0 0 12px #39ff1422;
+      border-radius:4px; transition:all .15s;
     }
-    .btn:hover { background:var(--green);color:var(--bg);box-shadow:0 0 20px #39ff1466;text-shadow:none; }
-    .btn.amber { border-color:var(--amber);color:var(--amber);text-shadow:var(--glow-a); }
-    .btn.amber:hover { background:var(--amber);color:var(--bg); }
+    .btn:hover { background:var(--green); color:var(--bg); box-shadow:0 0 24px #39ff1488; text-shadow:none; }
 
-    /* ── Status bar (bottom) ── */
+    /* ── Status bar ──────────────────────────────────────────────── */
     .status-bar {
-      width:100%;max-width:500px;
-      background:var(--surface);border:1px solid var(--border);border-top:none;
-      padding:5px 14px;display:flex;justify-content:space-between;align-items:center;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:4px 14px;
+      background:var(--surface);
+      border:1px solid var(--border); border-top:none;
+      border-radius:0 0 8px 8px;
+      flex-shrink:0;
     }
-    .status-left  { font-size:0.38rem;color:var(--comment); }
-    .status-right { font-size:0.38rem;color:var(--green-dim); }
-    .status-left .mode { color:var(--green);margin-right:10px; }
+    .status-bar span { font-size:clamp(0.32rem,0.9vw,0.44rem); color:var(--comment); }
+    .status-bar .mode { color:var(--green); margin-right:8px; font-weight:700; }
+    .status-bar .live { color:var(--green-mid); }
 
-    /* ── Toast notification (fun messages) ── */
+    /* ── Toast ───────────────────────────────────────────────────── */
     .toast {
-      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-      background:var(--surface);border:1px solid var(--green);
-      border-radius:6px;padding:8px 18px;
-      font-size:0.42rem;color:var(--green);
-      text-shadow:var(--glow-g);letter-spacing:1px;
-      z-index:300;
-      animation:toastIn .3s ease, toastOut .3s ease 2.2s forwards;
-      white-space:nowrap;
-      pointer-events:none;
+      position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+      background:var(--surface); border:1px solid var(--green); border-radius:6px;
+      padding:8px 22px;
+      font-size:clamp(0.42rem,1.3vw,0.55rem);
+      color:var(--green); text-shadow:var(--glow-g); letter-spacing:1px;
+      z-index:1000; white-space:nowrap; pointer-events:none;
+      animation:toastIn .3s ease, toastOut .3s ease 2.4s forwards;
     }
     @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
     @keyframes toastOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
 
-    /* ── D-Pad (mobile) ── */
-    .dpad { display:none;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:4px; }
-    @media (pointer:coarse),(max-width:480px){.dpad{display:grid}}
-    .dpad-btn {
-      background:rgba(57,255,20,0.06);border:1px solid rgba(57,255,20,0.2);
-      color:var(--green);font-size:1rem;cursor:pointer;border-radius:4px;
-      display:flex;align-items:center;justify-content:center;
-      user-select:none;-webkit-tap-highlight-color:transparent;transition:background .1s;
+    /* ── D-Pad ───────────────────────────────────────────────────── */
+    .dpad {
+      display:none;
+      grid-template-columns:repeat(3,54px);
+      grid-template-rows:repeat(3,54px);
+      gap:5px; margin-top:6px;
     }
-    .dpad-btn:active{background:rgba(57,255,20,0.2);}
-    .dpad-empty{background:transparent;border:none;}
+    @media (pointer:coarse),(max-width:520px){ .dpad{display:grid;} }
+    .dpad-btn {
+      background:rgba(57,255,20,0.07); border:1px solid rgba(57,255,20,0.25);
+      color:var(--green); font-size:1.2rem; cursor:pointer; border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      user-select:none; -webkit-tap-highlight-color:transparent; transition:background .1s;
+    }
+    .dpad-btn:active { background:rgba(57,255,20,0.25); }
+    .dpad-empty { background:transparent; border:none; }
   </style>
 </head>
 <body>
 
 <canvas id="matrix-bg"></canvas>
 
-<div class="page">
+<div class="shell">
 
-  <!-- Terminal title bar -->
-  <div class="terminal-bar">
+  <!-- Title bar -->
+  <div class="title-bar">
     <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
-    <span class="terminal-title">student@cse-lab:~$ <span>./bughunt --mode=survival</span></span>
+    <span class="title-text">Created BY $ <span>./BUCC R & D DEPARTMENT </span></span>
+    <span class="title-game">BUG HUNT</span>
   </div>
-
-  <!-- Game title -->
-  <div class="game-title">BUG HUNT</div>
-  <div class="game-subtitle">// <span>CSE Edition</span> — eat bugs, don't segfault</div>
 
   <!-- HUD -->
   <div class="hud">
     <div class="hud-item">
-      <span class="hud-key">BUGS_EATEN</span>
+      <span class="hud-label">BUGS_EATEN</span>
       <span class="hud-val" id="score">0</span>
     </div>
     <div class="hud-item">
-      <span class="hud-key">CPU_SPEED</span>
-      <div class="level-pips" id="pips">
-        <div class="pip on"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div>
+      <span class="hud-label">CPU_SPEED</span>
+      <div class="pip-row" id="pips">
+        <div class="pip on"></div><div class="pip"></div><div class="pip"></div>
+        <div class="pip"></div><div class="pip"></div>
       </div>
     </div>
     <div class="hud-item">
-      <span class="hud-key">HIGH_SCORE</span>
+      <span class="hud-label">HIGH_SCORE</span>
       <span class="hud-val amber" id="best">0</span>
     </div>
   </div>
 
-  <!-- Game canvas -->
-  <div class="game-wrapper">
-    <canvas id="gameCanvas" width="480" height="400" tabindex="0"></canvas>
+  <!-- Game area — flex:1 makes this take all remaining vertical space -->
+  <div class="game-area" id="gameArea">
+    <canvas id="gameCanvas" tabindex="0"></canvas>
 
     <!-- Start overlay -->
     <div class="overlay" id="startOverlay">
-      <div class="ov-title" style="color:var(--green)">BUG HUNT</div>
+      <div class="ov-title green">BUG HUNT</div>
       <div class="ov-code">
         <span class="kw">while</span> (student.<span class="fn">isAlive</span>()) {<br>
-        &nbsp;&nbsp;student.<span class="fn">eat</span>(<span class="str">"bugs"</span>);<br>
-        &nbsp;&nbsp;<span class="cmt">// avoid segfaults!</span><br>
-        &nbsp;&nbsp;<span class="kw">if</span> (bugs_eaten % <span class="num">8</span> == <span class="num">0</span>)<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;cpu_speed.<span class="fn">increment</span>();<br>
-        }<br>
-        <span class="err">// TODO: fix infinite loop</span>
+        &nbsp;&nbsp;student.<span class="fn">eat</span>(<span class="str">"bugs"</span>); &nbsp;<span class="cmt">// nom nom</span><br>
+        &nbsp;&nbsp;<span class="kw">if</span> (bugs % <span class="num">8</span> == <span class="num">0</span>) cpu_speed.<span class="fn">++</span>();<br>
+        &nbsp;&nbsp;<span class="kw">if</span> (hitWall) &nbsp;&nbsp;<span class="err">throw</span> <span class="str">SegFaultException</span>;<br>
+        &nbsp;&nbsp;<span class="kw">if</span> (ateSelf) &nbsp;&nbsp;<span class="err">throw</span> <span class="str">StackOverflowError</span>;<br>
+        } <span class="cmt">// TODO: fix infinite loop 🙃</span>
       </div>
-      <div class="ov-msg">
-        You are <span class="hl">nullptr</span> — a rogue pointer eating bugs.<br>
-        Don't hit the walls (that's a <span class="hl-r">segfault</span>).<br>
-        Don't eat yourself (that's a <span class="hl-r">stack overflow</span>).
+      <div class="ov-sub">
+        You are <span class="hl">nullptr</span> — a rogue pointer devouring bugs.<br>
+        Hit a wall = <span class="hl-r">segfault</span> &nbsp;·&nbsp; Eat yourself = <span class="hl-r">stack overflow</span>
       </div>
       <div class="btn-row">
         <button class="btn" id="startBtn" tabindex="-1">▶ RUN PROGRAM</button>
       </div>
-      <div class="ov-msg" style="font-size:0.38rem">WASD / ARROW KEYS · P = pause · ctrl+c = quit (just kidding)</div>
+      <div class="ov-sub" style="opacity:0.55;font-size:clamp(0.34rem,1vw,0.44rem)">
+        WASD / ARROW KEYS &nbsp;·&nbsp; P = pause &nbsp;·&nbsp; ctrl+c = quit (just kidding)
+      </div>
     </div>
 
     <!-- Game over overlay -->
     <div class="overlay hidden" id="gameOverOverlay">
-      <div class="ov-title" style="color:var(--red)" id="goTitle">SEGFAULT</div>
-      <div class="crash-reason" id="crashReason">Segmentation fault (core dumped)</div>
+      <div class="ov-title red" id="goTitle">SIGSEGV</div>
+      <div class="crash-box" id="crashReason">Segmentation fault (core dumped)</div>
       <div class="ov-score" id="finalScore">bugs_eaten = 0</div>
-      <div class="ov-msg" id="goMsg"></div>
+      <div class="ov-gomsg" id="goMsg"></div>
       <div class="btn-row">
-        <button class="btn" id="restartBtn" tabindex="-1">↺ RECOMPILE</button>
+        <button class="btn" id="restartBtn" tabindex="-1">↺ RECOMPILE &amp; RUN</button>
       </div>
     </div>
   </div>
 
   <!-- Status bar -->
   <div class="status-bar">
-    <div class="status-left"><span class="mode">INSERT</span> WASD/ARROWS · P=PAUSE</div>
-    <div class="status-right" id="statusRight">ln:0 col:0 | python3 bughunt.py</div>
+    <span><span class="mode">INSERT</span>WASD / ARROWS &nbsp;·&nbsp; P = PAUSE</span>
+    <span class="live" id="statusRight">ln:0 col:0 &nbsp;·&nbsp; python3 bughunt.py</span>
   </div>
 
-  <!-- Mobile D-Pad -->
+  <!-- Mobile D-pad -->
   <div class="dpad">
     <div class="dpad-empty"></div>
     <button class="dpad-btn" id="btn-up"    tabindex="-1">▲</button>
@@ -389,215 +378,212 @@
 </div>
 
 <script>
-// ── Matrix rain background ────────────────────────────────────────────────────
-(function() {
-  const c = document.getElementById('matrix-bg');
-  const x = c.getContext('2d');
-  function resize() { c.width=window.innerWidth; c.height=window.innerHeight; }
-  resize();
-  window.addEventListener('resize', resize);
-  const chars = '01アイウエオカキクケコ{}[];()<>=!&|^~%#@'.split('');
-  const cols  = Math.floor(window.innerWidth / 16);
-  const drops = Array(cols).fill(1);
-  setInterval(() => {
-    x.fillStyle='rgba(13,17,23,0.05)';
-    x.fillRect(0,0,c.width,c.height);
-    x.fillStyle='#39ff14';
-    x.font='14px Fira Code';
-    drops.forEach((y,i) => {
-      x.fillText(chars[Math.floor(Math.random()*chars.length)], i*16, y*16);
-      if(y*16>c.height && Math.random()>.975) drops[i]=0;
+// ── Matrix rain ───────────────────────────────────────────────────────────────
+(function(){
+  const c=document.getElementById('matrix-bg'), x=c.getContext('2d');
+  function rs(){ c.width=window.innerWidth; c.height=window.innerHeight; }
+  rs(); window.addEventListener('resize',rs);
+  const chars='01{}[];()<>=!&|^~%#@アイウエオカキクケコ'.split('');
+  let drops=Array(Math.floor(c.width/16)).fill(1);
+  setInterval(()=>{
+    x.fillStyle='rgba(13,17,23,0.05)'; x.fillRect(0,0,c.width,c.height);
+    x.fillStyle='#39ff14'; x.font='13px Fira Code';
+    drops.forEach((y,i)=>{
+      x.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,y*16);
+      if(y*16>c.height&&Math.random()>.975) drops[i]=0;
       drops[i]++;
     });
-  }, 60);
+  },65);
 })();
 
-// ── Game setup ────────────────────────────────────────────────────────────────
-const canvas = document.getElementById('gameCanvas');
-const ctx    = canvas.getContext('2d');
-const CELL   = 20;
-const COLS   = canvas.width  / CELL;
-const ROWS   = canvas.height / CELL;
-const SPEEDS = [160, 130, 100, 72, 48];
+// ── Canvas — sized to fill game-area exactly ──────────────────────────────────
+const canvas   = document.getElementById('gameCanvas');
+const ctx      = canvas.getContext('2d');
+const gameArea = document.getElementById('gameArea');
 
-// CSE-themed bug emojis / symbols drawn on food
-const BUGS = ['🐛','💀','⚠️','🔴','💣','🦠','👾','☠️'];
-const BUG_LABELS = ['NullPointerException','SegFault','MemoryLeak','InfiniteLoop','StackOverflow','HeapCorrupt','UndefinedBehavior','RaceCondition'];
+const CELL = 24;          // 24px cells — big and clear
+let COLS=0, ROWS=0;
 
-// Fun death messages
-const DEATH_WALL = [
+function resizeCanvas(){
+  const W=gameArea.clientWidth, H=gameArea.clientHeight;
+  COLS=Math.floor(W/CELL); ROWS=Math.floor(H/CELL);
+  canvas.width=COLS*CELL;  canvas.height=ROWS*CELL;
+  // CSS size = container size so it doesn't over/under-fill
+  canvas.style.width  = W+'px';
+  canvas.style.height = H+'px';
+  if(snake) draw();
+}
+window.addEventListener('resize', resizeCanvas);
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+const SPEEDS=[155,125,95,68,45];
+const BUGS  =['🐛','💀','⚠️','💣','🦠','👾','☠️','🔥'];
+const BUG_LABELS=[
+  'NullPointerException','SegFault','MemoryLeak','HeapCorruption',
+  'StackOverflow','UndefinedBehavior','InfiniteLoop','RaceCondition'
+];
+const DEATH_WALL=[
   'Segmentation fault (core dumped)',
-  'Error: accessed memory outside bounds',
-  'Process killed: Out of stack space',
+  'Error: accessed memory at address 0x0000000',
   'Fatal: wall is not a valid memory address',
-  'Exception: IndexOutOfBoundsException',
-  'Bus error: 10',
+  'Exception: IndexOutOfBoundsException at boundary',
+  'Bus error: 10 — invalid memory alignment',
+  'Killed: process exceeded address space limit',
 ];
-const DEATH_SELF = [
-  'StackOverflowError: recursion depth exceeded',
-  'Fatal: snake ate its own tail (circular dependency)',
+const DEATH_SELF=[
+  'StackOverflowError: max recursion depth exceeded',
+  'Fatal: circular dependency in snake.body[]',
   'Error: self-referential pointer dereference',
-  'Infinite loop detected — killing process',
-  'Caught: CyclicImportException',
-  'git error: cannot merge with itself',
+  'CyclicImportException: module imported itself',
+  'git merge failed: cannot merge with itself',
+  'Infinite loop O(∞) — professor is not amused',
 ];
-const GO_MSGS = [
-  ['Your code compiled but crashed at runtime. Classic.', '😅'],
-  ['Have you tried turning it off and on again?', '🔄'],
-  ['That\'s going in the bug tracker.', '🐛'],
-  ['404: skill not found. Keep practicing!', '📚'],
-  ['Your professor is watching. Git push and try again.', '👀'],
-  ['At least it\'s not a production server.', '😂'],
-  ['printf("help\\n"); — every CSE student ever', '💬'],
-  ['This would\'ve been caught by a linter.', '🔍'],
+const GO_MSGS=[
+  ['Compiled fine. Crashed at runtime. Classic CSE.','😅'],
+  ['Have you tried `git stash` and running again?','🔄'],
+  ['This is going in the bug tracker as P0.','🐛'],
+  ['404: skill not found. Stack Overflow can\'t help you now.','📚'],
+  ['Your professor saw that. Push to GitHub anyway.','👀'],
+  ['At least it\'s not the production database.','😂'],
+  ['printf("why\\n"); — every CSE student, 2am.','💬'],
+  ['A linter would\'ve caught this. Just saying.','🔍'],
+  ['This is why we write unit tests. (Nobody writes unit tests.)','🧪'],
+  ['Rubber duck debugging failed. The duck quit.','🦆'],
 ];
-const TOASTS = [
-  '// bug squashed!',
-  'git commit -m "fixed a bug"',
-  '++bugs_eaten; // O(n)',
-  'Garbage collected! ♻️',
-  'malloc() success!',
-  'assert(bugs > 0);',
+const TOASTS=[
+  '// bug squashed! ✅',
+  'git commit -m "fixed a bug, broke 3 more"',
+  '++bugs_eaten; // O(hunger)',
+  'malloc() returned valid ptr 🎉',
+  'assert(bugs_eaten > 0); // passes',
   'cherry-picked that bug 🍒',
-  'O(1) snack!',
-  'heap allocated snack 🎉',
-  'rm -rf bug/',
+  'Garbage collected! ♻️',
+  'rm -rf ./bug',
+  'heap snack acquired 📦',
+  '// TODO: delete this comment',
+  'pip install patience',
+  'segfault avoided! (this time)',
 ];
 
-let snake, dir, nextDir, food, foodType;
-let score, level, paused, gameRunning, gameLoop, bugCount;
-let best = 0;
-try { best = parseInt(localStorage.getItem('bughunt_best')||'0')||0; } catch(_) {}
-document.getElementById('best').textContent = best;
+let snake,dir,nextDir,food,foodType;
+let score=0,level=0,bugCount=0,paused=false,gameRunning=false,gameLoop;
+let best=0;
+try{best=parseInt(localStorage.getItem('bughunt_best')||'0')||0;}catch(_){}
+document.getElementById('best').textContent=best;
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getSpeed = () => SPEEDS[Math.min(level, SPEEDS.length-1)];
-const rand = (arr) => arr[Math.floor(Math.random()*arr.length)];
+const getSpeed=()=>SPEEDS[Math.min(level,SPEEDS.length-1)];
+const rand=arr=>arr[Math.floor(Math.random()*arr.length)];
 
-function updatePips() {
-  document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('on', i<=level));
+function updatePips(){
+  document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('on',i<=level));
 }
 
-function placeFood() {
+function placeFood(){
   let pos;
-  do { pos={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}; }
-  while (snake.some(s=>s.x===pos.x&&s.y===pos.y));
-  food = pos;
-  foodType = Math.floor(Math.random()*BUGS.length);
+  do{pos={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)};}
+  while(snake.some(s=>s.x===pos.x&&s.y===pos.y));
+  food=pos; foodType=Math.floor(Math.random()*BUGS.length);
 }
 
-function showToast(msg) {
+function showToast(msg){
   document.querySelectorAll('.toast').forEach(t=>t.remove());
-  const t = document.createElement('div');
+  const t=document.createElement('div');
   t.className='toast'; t.textContent=msg;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 2600);
+  setTimeout(()=>t.remove(),2800);
 }
 
-function blurActive() {
-  if(document.activeElement && document.activeElement!==document.body)
+function blurActive(){
+  if(document.activeElement&&document.activeElement!==document.body)
     document.activeElement.blur();
 }
 
-// ── Start / Restart ───────────────────────────────────────────────────────────
-function startGame() {
+// ── Start ─────────────────────────────────────────────────────────────────────
+function startGame(){
+  resizeCanvas();
   document.getElementById('startOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
 
-  snake   = [{x:12,y:10},{x:11,y:10},{x:10,y:10},{x:9,y:10}];
-  dir     = {x:1,y:0};
-  nextDir = {x:1,y:0};
-  score   = 0; level=0; bugCount=0; paused=false; gameRunning=true;
-
+  const sx=Math.floor(COLS/2), sy=Math.floor(ROWS/2);
+  snake=[{x:sx,y:sy},{x:sx-1,y:sy},{x:sx-2,y:sy},{x:sx-3,y:sy}];
+  dir={x:1,y:0}; nextDir={x:1,y:0};
+  score=0; level=0; bugCount=0; paused=false; gameRunning=true;
   updatePips();
-  document.getElementById('score').textContent = 0;
-  document.getElementById('statusRight').textContent = 'ln:0 col:0 | running...';
-  placeFood();
-  clearInterval(gameLoop);
-  gameLoop = setInterval(tick, getSpeed());
+  document.getElementById('score').textContent=0;
+  document.getElementById('statusRight').textContent='running... pid:'+Math.floor(Math.random()*9000+1000);
+  placeFood(); clearInterval(gameLoop);
+  gameLoop=setInterval(tick,getSpeed());
   blurActive();
 }
 
 // ── Tick ──────────────────────────────────────────────────────────────────────
-function tick() {
+function tick(){
   if(paused) return;
-  dir = {...nextDir};
-  const head = {x:snake[0].x+dir.x, y:snake[0].y+dir.y};
-
-  const wallHit = head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS;
-  const selfHit = snake.some(s=>s.x===head.x&&s.y===head.y);
-
+  dir={...nextDir};
+  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  const wallHit=head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS;
+  const selfHit=snake.some(s=>s.x===head.x&&s.y===head.y);
   if(wallHit||selfHit) return endGame(wallHit?'wall':'self');
 
   snake.unshift(head);
-
-  if(head.x===food.x && head.y===food.y) {
-    bugCount++;
-    score += 10*(level+1);
-    document.getElementById('score').textContent = score;
-    document.getElementById('statusRight').textContent =
-      `bugs:${bugCount} score:${score} | level ${level+1}`;
-
-    // Level up every 8 bugs
-    const nl = Math.min(Math.floor(bugCount/8), 4);
-    if(nl>level) {
+  if(head.x===food.x&&head.y===food.y){
+    bugCount++; score+=10*(level+1);
+    document.getElementById('score').textContent=score;
+    document.getElementById('statusRight').textContent=`bugs:${bugCount}  score:${score}  level:${level+1}`;
+    const nl=Math.min(Math.floor(bugCount/8),4);
+    if(nl>level){
       level=nl; clearInterval(gameLoop);
       gameLoop=setInterval(tick,getSpeed()); updatePips();
-      showToast(`🚀 CPU_SPEED++ // now O(${['n','log n','√n','log²n','1'][level]})`);
-    } else {
-      // Show fun toast occasionally
-      if(bugCount%3===0) showToast(rand(TOASTS));
-    }
+      showToast(`🚀 CPU_SPEED++ → O(${['n','log n','√n','log²n','1'][level]})`);
+    } else if(bugCount%3===0) showToast(rand(TOASTS));
     placeFood();
-  } else {
-    snake.pop();
-  }
-  draw();
+  } else { snake.pop(); }
 }
 
-// ── End game ──────────────────────────────────────────────────────────────────
-function endGame(type) {
-  clearInterval(gameLoop);
-  gameRunning = false;
-
-  if(score>best) {
+// ── End ───────────────────────────────────────────────────────────────────────
+function endGame(type){
+  clearInterval(gameLoop); gameRunning=false;
+  if(score>best){
     best=score;
     try{localStorage.setItem('bughunt_best',best);}catch(_){}
     document.getElementById('best').textContent=best;
   }
-
-  const isWall = type==='wall';
-  const reasons = isWall ? DEATH_WALL : DEATH_SELF;
-  const goMsg   = rand(GO_MSGS);
-
-  document.getElementById('goTitle').textContent     = isWall ? 'SIGSEGV' : 'STACK OVERFLOW';
-  document.getElementById('crashReason').textContent = rand(reasons);
-  document.getElementById('finalScore').textContent  = `bugs_eaten = ${score}`;
-  document.getElementById('goMsg').innerHTML =
-    `<span class="hl">${goMsg[0]}</span> ${goMsg[1]}` +
-    (score>=best && score>0 ? '<br><span class="hl">// 🏆 new high score!</span>' : '');
-
+  const msg=rand(GO_MSGS);
+  document.getElementById('goTitle').textContent    =type==='wall'?'SIGSEGV':'STACK OVERFLOW';
+  document.getElementById('crashReason').textContent=rand(type==='wall'?DEATH_WALL:DEATH_SELF);
+  document.getElementById('finalScore').textContent =`bugs_eaten = ${score}`;
+  document.getElementById('goMsg').innerHTML=
+    `<span class="hl">${msg[0]}</span> ${msg[1]}`+
+    (score>0&&score>=best?'<br><span class="hl-a">// 🏆 new high score! git commit -m "i am speed"</span>':'');
   document.getElementById('gameOverOverlay').classList.remove('hidden');
-  document.getElementById('statusRight').textContent = `EXIT_CODE: 139 | core dumped`;
+  document.getElementById('statusRight').textContent='EXIT_CODE: 139 | core dumped 💀';
 
-  // Glitch flash
   let f=0;
   const fi=setInterval(()=>{
-    ctx.fillStyle=f%2===0?`rgba(255,${f%4===0?68:0},${f%4===0?0:200},0.2)`:'transparent';
+    ctx.fillStyle=f%2===0?`rgba(255,${f%4===0?44:0},${f%4===0?0:180},0.22)`:'transparent';
     ctx.fillRect(0,0,canvas.width,canvas.height);
-    if(++f>=8) clearInterval(fi);
-  },60);
+    if(++f>=10) clearInterval(fi);
+  },55);
 }
 
 // ── Draw ──────────────────────────────────────────────────────────────────────
-function draw() {
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);     ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function draw(){
+  if(!COLS||!ROWS||!snake) return;
+
   // Background
-  ctx.fillStyle='#0d1117';
+  ctx.fillStyle='#080c10';
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // Grid (subtle)
-  ctx.strokeStyle='rgba(48,54,61,0.4)';
-  ctx.lineWidth=0.5;
+  // Grid lines — green tint, very subtle
+  ctx.strokeStyle='rgba(57,255,20,0.055)';
+  ctx.lineWidth=1;
   for(let x=0;x<=COLS;x++){
     ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,canvas.height);ctx.stroke();
   }
@@ -605,113 +591,106 @@ function draw() {
     ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(canvas.width,y*CELL);ctx.stroke();
   }
 
-  // Food — draw bug label above it
+  // ── Food
   const fx=food.x*CELL, fy=food.y*CELL;
+  const pulse=0.5+0.5*Math.sin(Date.now()/260);
 
-  // Pulsing glow under food
-  const pulse = 0.5+0.5*Math.sin(Date.now()/300);
+  // Glowing bg behind food
   ctx.save();
-  ctx.shadowColor='#ff4444';
-  ctx.shadowBlur=10+pulse*10;
-  ctx.fillStyle=`rgba(255,68,68,${0.12+pulse*0.08})`;
-  ctx.fillRect(fx+1,fy+1,CELL-2,CELL-2);
+  ctx.shadowColor='#ff3333'; ctx.shadowBlur=18+pulse*16;
+  ctx.fillStyle=`rgba(255,70,70,${0.11+pulse*0.11})`;
+  roundRect(ctx,fx+2,fy+2,CELL-4,CELL-4,5); ctx.fill();
   ctx.restore();
 
-  // Bug emoji
+  // Emoji (sized to cell)
   ctx.font=`${CELL-2}px serif`;
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(BUGS[foodType], fx+CELL/2, fy+CELL/2+1);
 
-  // Bug label above
-  ctx.font='bold 7px Fira Code';
-  ctx.fillStyle='rgba(255,68,68,0.7)';
-  ctx.fillText(BUG_LABELS[foodType], fx+CELL/2, fy-3);
+  // Bug label — pill above the cell
+  const label=BUG_LABELS[foodType];
+  const fs=Math.max(8,CELL*0.36);
+  ctx.font=`bold ${fs}px Fira Code`;
+  const lw=ctx.measureText(label).width;
+  ctx.fillStyle='rgba(30,0,0,0.82)';
+  ctx.fillRect(fx+CELL/2-lw/2-5, fy-fs-4, lw+10, fs+4);
+  ctx.fillStyle='rgba(255,110,110,0.95)';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText(label, fx+CELL/2, fy-2);
 
-  // Snake — looks like code tokens
+  // ── Snake
   snake.forEach((seg,i)=>{
-    const isHead=i===0;
-    const t=i/snake.length;
+    const isHead=i===0, t=i/Math.max(snake.length,1);
     const x=seg.x*CELL, y=seg.y*CELL;
+    const pad=isHead?1:2, r=isHead?7:4;
 
     ctx.save();
     if(isHead){
-      ctx.shadowColor='#39ff14';
-      ctx.shadowBlur=14;
+      ctx.shadowColor='#39ff14'; ctx.shadowBlur=22;
       ctx.fillStyle='#39ff14';
     } else {
-      ctx.shadowColor='rgba(57,255,20,0.2)';
-      ctx.shadowBlur=4;
-      // Gradient from green to dim
-      const g=Math.floor(255*(1-t*0.7));
-      ctx.fillStyle=`rgb(0,${g},0)`;
+      const b=Math.max(0.22,1-t*0.75);
+      ctx.shadowColor=`rgba(57,255,20,${0.28*b})`;
+      ctx.shadowBlur=7;
+      ctx.fillStyle=`rgb(${Math.floor(8+b*25)},${Math.floor(b*215)},${Math.floor(b*18)})`;
     }
-
-    // Rounded body
-    const pad=isHead?1:2, r=isHead?5:3;
     roundRect(ctx,x+pad,y+pad,CELL-pad*2,CELL-pad*2,r);
     ctx.fill();
 
-    // Head details
-    if(isHead){
-      // Eyes
-      ctx.shadowBlur=0;
-      ctx.fillStyle='#0d1117';
-      if(dir.x!==0){
-        ctx.fillRect(x+CELL/2+dir.x*4, y+5, 3,3);
-        ctx.fillRect(x+CELL/2+dir.x*4, y+CELL-8, 3,3);
-      } else {
-        ctx.fillRect(x+5, y+CELL/2+dir.y*4, 3,3);
-        ctx.fillRect(x+CELL-8, y+CELL/2+dir.y*4, 3,3);
-      }
-
-      // Label "ptr" on head
-      ctx.fillStyle='rgba(57,255,20,0.5)';
-      ctx.font='bold 6px Fira Code';
-      ctx.textAlign='center';
-      ctx.textBaseline='middle';
-      ctx.fillText('ptr', x+CELL/2, y+CELL/2);
+    // Array index on body segments (every 5th)
+    if(!isHead&&i%5===0&&CELL>=22){
+      ctx.fillStyle='rgba(57,255,20,0.2)';
+      ctx.font=`${Math.max(7,CELL*0.3)}px Fira Code`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(`[${i}]`,x+CELL/2,y+CELL/2);
     }
 
+    if(isHead){
+      ctx.shadowBlur=0; ctx.fillStyle='#060a0e';
+      const ew=Math.max(3,CELL*0.14), eh=ew;
+      if(dir.x!==0){
+        ctx.fillRect(x+CELL/2+dir.x*5,y+CELL*0.26,ew,eh);
+        ctx.fillRect(x+CELL/2+dir.x*5,y+CELL*0.60,ew,eh);
+      } else {
+        ctx.fillRect(x+CELL*0.24,y+CELL/2+dir.y*5,ew,eh);
+        ctx.fillRect(x+CELL*0.60,y+CELL/2+dir.y*5,ew,eh);
+      }
+      ctx.fillStyle='rgba(0,25,0,0.55)';
+      ctx.font=`bold ${Math.max(7,CELL*0.3)}px Fira Code`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('ptr',x+CELL/2,y+CELL/2);
+    }
     ctx.restore();
   });
 
-  // Coordinate display (like an IDE)
-  ctx.font='9px Fira Code';
-  ctx.fillStyle='rgba(139,148,158,0.4)';
-  ctx.textAlign='left';
-  ctx.textBaseline='top';
-  ctx.fillText(`[${snake[0].x},${snake[0].y}]`, 4, 4);
+  // IDE-style coordinate display
+  ctx.save();
+  ctx.font=`${Math.max(9,CELL*0.38)}px Fira Code`;
+  ctx.fillStyle='rgba(57,255,20,0.28)';
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText(`ptr[${snake[0].x},${snake[0].y}]  len:${snake.length}`,6,5);
+  ctx.restore();
 }
 
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);    ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
+// ── Animation loop ────────────────────────────────────────────────────────────
+function animLoop(){ if(snake) draw(); requestAnimationFrame(animLoop); }
 
-// Request animation frame for smooth food pulse
-function animLoop() {
-  if(gameRunning && !paused) draw();
-  requestAnimationFrame(animLoop);
-}
-// Initial draw
-snake=[{x:12,y:10},{x:11,y:10},{x:10,y:10},{x:9,y:10}];
-dir={x:1,y:0}; food={x:16,y:8}; foodType=0; draw();
+// Init — idle snake for start screen
+resizeCanvas();
+const SC=Math.max(5,Math.floor((COLS||20)/2));
+const SR=Math.max(3,Math.floor((ROWS||10)/2));
+snake=[{x:SC,y:SR},{x:SC-1,y:SR},{x:SC-2,y:SR},{x:SC-3,y:SR}];
+dir={x:1,y:0}; food={x:SC+5,y:SR-2}; foodType=0;
 animLoop();
 
 // ── Controls ──────────────────────────────────────────────────────────────────
-const KEY_MAP = {
+const KEY_MAP={
   ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},
   w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},
 };
 const GAME_KEYS=new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D','p','P']);
 
-function applyDir(nd){
-  if(!gameRunning)return;
-  if(nd.x!==-dir.x||nd.y!==-dir.y) nextDir=nd;
-}
+function applyDir(nd){ if(!gameRunning)return; if(nd.x!==-dir.x||nd.y!==-dir.y) nextDir=nd; }
 
 function handleKey(e){
   if(e.target.tagName==='INPUT') return;
@@ -722,12 +701,11 @@ function handleKey(e){
   const nd=KEY_MAP[k]||KEY_MAP[k.toLowerCase()];
   if(nd) applyDir(nd);
 }
+window.addEventListener('keydown',   handleKey,{capture:true});
+document.addEventListener('keydown', handleKey,{capture:true});
 
-window.addEventListener('keydown',   handleKey, {capture:true});
-document.addEventListener('keydown', handleKey, {capture:true});
-
-document.getElementById('startBtn').addEventListener('click',   ()=>{startGame();blurActive();});
-document.getElementById('restartBtn').addEventListener('click', ()=>{startGame();blurActive();});
+document.getElementById('startBtn').addEventListener('click',  ()=>{startGame();blurActive();});
+document.getElementById('restartBtn').addEventListener('click',()=>{startGame();blurActive();});
 
 [['btn-up',{x:0,y:-1}],['btn-down',{x:0,y:1}],['btn-left',{x:-1,y:0}],['btn-right',{x:1,y:0}]]
   .forEach(([id,nd])=>document.getElementById(id).addEventListener('click',()=>{applyDir(nd);blurActive();}));
